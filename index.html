@@ -2,61 +2,155 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> <title>Digitag Memory - V27 (Mobile Perfect)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Digitag Memory - V27 (Mobile Perfect)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
     <style>
         /* Empêche le comportement tactile par défaut du navigateur (scroll, refresh) */
-        body { margin: 0; overflow: hidden; background-color: transparent; font-family: -apple-system, BlinkMacSystemFont, sans-serif; touch-action: none; }
-        #canvas-container { width: 100vw; height: 100vh; display: block; outline: none; -webkit-tap-highlight-color: transparent; }
-        
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            touch-action: none;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         /* UI CONTROLES */
         #ui-cam {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 15px; z-index: 10;
-            background: rgba(255,255,255,0.85); padding: 12px 25px; border-radius: 40px;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5);
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+            background: rgba(255,255,255,0.85);
+            padding: 12px 25px;
+            border-radius: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.5);
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             transition: opacity 0.5s;
         }
         button.ctrl-btn {
-            background: #1d1d1f; color: white; border: none; padding: 12px 24px; /* Boutons plus gros pour le doigt */
-            border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer;
+            background: #1d1d1f;
+            color: white;
+            border: none;
+            padding: 12px 24px; /* Boutons plus gros pour le doigt */
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
             transition: transform 0.2s;
         }
-        button.ctrl-btn:active { transform: scale(0.95); } /* Feedback visuel au toucher */
+        button.ctrl-btn:active {
+            transform: scale(0.95);
+        }
 
         /* CARTES INFO */
         .info-card {
-            position: absolute; top: 15%; right: 5%; width: 280px; left: 5%; margin: auto; /* Centré sur mobile */
-            background: rgba(255, 255, 255, 0.95); padding: 25px; border-radius: 24px;
+            position: absolute;
+            top: 15%;
+            right: 5%;
+            width: 280px;
+            left: 5%;
+            margin: auto; /* Centré sur mobile */
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 24px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            opacity: 0; transform: translateY(20px); pointer-events: none; /* Slide du bas plus joli sur mobile */
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); z-index: 20;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none; /* Slide du bas plus joli sur mobile */
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 20;
             border: 1px solid rgba(255,255,255,0.5);
         }
-        @media (min-width: 768px) { .info-card { left: auto; top: 20%; right: 10%; transform: translateX(50px); } } /* Retour à droite sur PC */
-        
-        .info-card.active { opacity: 1; transform: translate(0, 0); pointer-events: auto; }
-        .info-card h2 { margin: 0 0 10px 0; font-size: 22px; color: #111; font-weight: 700; }
-        .info-card p { font-size: 14px; color: #666; line-height: 1.5; margin: 0; }
-        .tag { display: inline-block; background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        @media (min-width: 768px) {
+            .info-card {
+                left: auto;
+                top: 20%;
+                right: 10%;
+                transform: translateX(50px);
+            }
+        }
+
+        .info-card.active {
+            opacity: 1;
+            transform: translate(0, 0);
+            pointer-events: auto;
+        }
+        .info-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 22px;
+            color: #111;
+            font-weight: 700;
+        }
+        .info-card p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .tag {
+            display: inline-block;
+            background: #007aff;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
         /* BOUTON RETOUR */
         #btn-back {
-            position: absolute; top: 30px; left: 20px;
-            background: white; color: #111; padding: 12px 20px; border-radius: 30px;
-            font-weight: 600; cursor: pointer; border: 1px solid #ddd;
-            opacity: 0; transform: translateY(-20px); pointer-events: none;
-            transition: all 0.4s ease; z-index: 20; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: absolute;
+            top: 30px;
+            left: 20px;
+            background: white;
+            color: #111;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+            transition: all 0.4s ease;
+            z-index: 20;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
-        #btn-back.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        #btn-back.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
 
         /* LOADER */
         #loader {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; padding: 15px 30px; border-radius: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-size: 13px; color: #666;
-            transition: opacity 0.5s; pointer-events: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            font-size: 13px;
+            color: #666;
+            transition: opacity 0.5s;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -86,7 +180,12 @@
     <div id="canvas-container"></div>
 
     <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
     </script>
 
     <script type="module">
@@ -95,11 +194,22 @@
         import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
         // --- SCENE & CAMERA ---
-        const scene = new THREE.Scene(); scene.background = new THREE.Color(0xfbfbfd);
-        const camera = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 100);
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xfbfbfd);
+
+        const camera = new THREE.PerspectiveCamera(
+            35,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            100
+        );
         camera.position.set(4, 5, 6);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, logarithmicDepthBuffer: true });
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            logarithmicDepthBuffer: true
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio); // Important pour la netteté sur mobile
         renderer.shadowMap.enabled = true;
@@ -107,17 +217,32 @@
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
         // --- LUMIERES ---
-        const amb = new THREE.AmbientLight(0xffffff, 0.7); scene.add(amb);
+        const amb = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(amb);
+
         const main = new THREE.DirectionalLight(0xffffff, 1.5);
-        main.position.set(5, 8, 5); main.castShadow = true;
-        main.shadow.mapSize.set(2048,2048); main.shadow.bias = -0.0005; scene.add(main);
+        main.position.set(5, 8, 5);
+        main.castShadow = true;
+        main.shadow.mapSize.set(2048, 2048);
+        main.shadow.bias = -0.0005;
+        scene.add(main);
+
         const fill = new THREE.DirectionalLight(0xeef4ff, 0.5);
-        fill.position.set(-5, 2, -5); scene.add(fill);
+        fill.position.set(-5, 2, -5);
+        scene.add(fill);
 
         // --- TEXTURES ---
-        const manager = new THREE.LoadingManager(() => { document.getElementById('loader').style.opacity=0; });
+        const manager = new THREE.LoadingManager(() => {
+            document.getElementById('loader').style.opacity = 0;
+        });
+
         const tl = new THREE.TextureLoader(manager);
-        const getTex = (u) => { const t = tl.load(u); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=16; return t; };
+        const getTex = (u) => {
+            const t = tl.load(u);
+            t.colorSpace = THREE.SRGBColorSpace;
+            t.anisotropy = 16;
+            return t;
+        };
 
         const texLogo = getTex('logo.jpg');
         const texInside = getTex('interieur.jpg');
@@ -125,70 +250,169 @@
         const texPouch = getTex('pochon.jpg');
         const texMarble = getTex('marbre.jpg');
         const texFlap = getTex('languette.jpg');
-        const texWipes = getTex('lingettes.jpg'); 
+        const texWipes = getTex('lingettes.jpg');
 
         // --- MATERIAUX ---
-        const matExt = new THREE.MeshStandardMaterial({ map: texMarble, roughness: 0.5, metalness: 0.1 });
-        const matLogo = new THREE.MeshStandardMaterial({ map: texLogo, roughness: 0.5 });
-        const matIn = new THREE.MeshStandardMaterial({ map: texInside, roughness: 0.8 });
-        const matPlate = new THREE.MeshPhysicalMaterial({ map: texPlate, roughness: 0.2, clearcoat: 1 });
-        const matPouch = new THREE.MeshStandardMaterial({ map: texPouch, roughness: 0.6 });
-        const matFlap = new THREE.MeshStandardMaterial({ map: texFlap, roughness: 0.5 });
-        const matFoam = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.95 });
-        const matWipeSolid = new THREE.MeshStandardMaterial({ map: texWipes, roughness: 0.4, metalness: 0.3, side: THREE.DoubleSide });
+        const matExt = new THREE.MeshStandardMaterial({
+            map: texMarble,
+            roughness: 0.5,
+            metalness: 0.1
+        });
+
+        const matLogo = new THREE.MeshStandardMaterial({
+            map: texLogo,
+            roughness: 0.5
+        });
+
+        const matIn = new THREE.MeshStandardMaterial({
+            map: texInside,
+            roughness: 0.8
+        });
+
+        const matPlate = new THREE.MeshPhysicalMaterial({
+            map: texPlate,
+            roughness: 0.2,
+            clearcoat: 1
+        });
+        matPlate.polygonOffset = true;
+        matPlate.polygonOffsetFactor = -1;
+        matPlate.polygonOffsetUnits = -4;
+
+        const matPouch = new THREE.MeshStandardMaterial({
+            map: texPouch,
+            roughness: 0.6
+        });
+        matPouch.polygonOffset = true;
+        matPouch.polygonOffsetFactor = -1;
+        matPouch.polygonOffsetUnits = -4;
+
+        const matFlap = new THREE.MeshStandardMaterial({
+            map: texFlap,
+            roughness: 0.5
+        });
+
+        const matFoam = new THREE.MeshStandardMaterial({
+            color: 0x1a1a1a,
+            roughness: 0.95
+        });
+
+        const matWipeSolid = new THREE.MeshStandardMaterial({
+            map: texWipes,
+            roughness: 0.4,
+            metalness: 0.3,
+            side: THREE.DoubleSide
+        });
+        matWipeSolid.polygonOffset = true;
+        matWipeSolid.polygonOffsetFactor = -1;
+        matWipeSolid.polygonOffsetUnits = -4;
 
         // --- GEOMETRIE ---
-        const group = new THREE.Group(); scene.add(group);
-        const W=2.1, D=1.0, H=0.35;
+        const group = new THREE.Group();
+        scene.add(group);
 
-        const base = new THREE.Mesh(new RoundedBoxGeometry(W, H, D, 4, 0.01), matExt);
-        base.position.y=H/2; base.castShadow=true; group.add(base);
+        const W = 2.1;
+        const D = 1.0;
+        const H = 0.35;
 
-        const foam = new THREE.Mesh(new THREE.BoxGeometry(W-0.08, 0.05, D-0.08), matFoam);
-        foam.position.set(0, H-0.025, 0); group.add(foam);
+        const base = new THREE.Mesh(
+            new RoundedBoxGeometry(W, H, D, 4, 0.01),
+            matExt
+        );
+        base.position.y = H / 2;
+        base.castShadow = true;
+        group.add(base);
+
+        const foam = new THREE.Mesh(
+            new THREE.BoxGeometry(W - 0.08, 0.05, D - 0.08),
+            matFoam
+        );
+        foam.position.set(0, H - 0.025, 0);
+        group.add(foam);
 
         // --- OBJETS VISIBLES ---
-        const plate = new THREE.Mesh(new RoundedBoxGeometry(0.85, 0.01, 0.54, 2, 0.01), matPlate);
-        plate.position.set(-0.45, 0.031, 0); plate.castShadow=true; plate.userData={id:'plate', y:0.031};
+        const plate = new THREE.Mesh(
+            new RoundedBoxGeometry(0.85, 0.01, 0.54, 2, 0.01),
+            matPlate
+        );
+        plate.position.set(-0.45, 0.07, 0);
+        plate.castShadow = true;
+        plate.userData = { id: 'plate', y: 0.07 };
         foam.add(plate);
 
-        const pouch = new THREE.Mesh(new RoundedBoxGeometry(0.7, 0.04, 0.8, 2, 0.1), matPouch);
-        pouch.position.set(0.5, 0.041, 0); pouch.castShadow=true; pouch.userData={id:'pouch', y:0.041};
+        const pouch = new THREE.Mesh(
+            new RoundedBoxGeometry(0.7, 0.04, 0.8, 2, 0.1),
+            matPouch
+        );
+        pouch.position.set(0.5, 0.09, 0);
+        pouch.castShadow = true;
+        pouch.userData = { id: 'pouch', y: 0.09 };
         foam.add(pouch);
 
-        const wipeObj = new THREE.Mesh(new RoundedBoxGeometry(0.7, 0.015, 0.7, 2, 0.05), matWipeSolid);
-        wipeObj.position.set(0.5, 0.0, 0); wipeObj.castShadow = true;
+        const wipeObj = new THREE.Mesh(
+            new RoundedBoxGeometry(0.7, 0.015, 0.7, 2, 0.05),
+            matWipeSolid
+        );
+        wipeObj.position.set(0.5, 0.11, 0);
+        wipeObj.castShadow = true;
+        wipeObj.userData = { y: 0.11 };
         foam.add(wipeObj);
 
         // --- HITBOXES INVISIBLES (LE SECRET POUR LE MOBILE) ---
-        // Ce sont des boites transparentes plus grosses autour des objets pour faciliter le clic
-        const hitMat = new THREE.MeshBasicMaterial({ visible: false }); // Invisible
-        
-        const hitPlate = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.2, 0.8), hitMat);
-        hitPlate.position.set(-0.45, 0.1, 0); 
-        hitPlate.userData = { parentObj: plate }; // Lien vers le vrai objet
+        const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+
+        const hitPlate = new THREE.Mesh(
+            new THREE.BoxGeometry(1.0, 0.2, 0.8),
+            hitMat
+        );
+        hitPlate.position.set(-0.45, 0.1, 0);
+        hitPlate.userData = { parentObj: plate };
         foam.add(hitPlate);
 
-        const hitPouch = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.2, 0.9), hitMat);
+        const hitPouch = new THREE.Mesh(
+            new THREE.BoxGeometry(0.9, 0.2, 0.9),
+            hitMat
+        );
         hitPouch.position.set(0.5, 0.1, 0);
-        hitPouch.userData = { parentObj: pouch }; // Lien vers le vrai objet
+        hitPouch.userData = { parentObj: pouch };
         foam.add(hitPouch);
 
         // Couvercle
-        const lidPivot = new THREE.Group(); lidPivot.position.set(0, H, -D/2); group.add(lidPivot);
-        const lid = new THREE.Mesh(new RoundedBoxGeometry(W, 0.05, D, 4, 0.01), [matExt,matExt,matLogo,matIn,matExt,matExt]);
-        lid.position.set(0, 0.02, D/2); lid.castShadow=true; lidPivot.add(lid);
-        const flap = new THREE.Mesh(new RoundedBoxGeometry(W, H, 0.04, 4, 0.01), matFlap);
-        flap.position.set(0, -H/2+0.02, D/2-0.015); flap.castShadow=true; lid.add(flap);
+        const lidPivot = new THREE.Group();
+        lidPivot.position.set(0, H, -D / 2);
+        group.add(lidPivot);
 
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(30,30), new THREE.ShadowMaterial({opacity:0.15}));
-        floor.rotation.x=-Math.PI/2; scene.add(floor);
+        const lid = new THREE.Mesh(
+            new RoundedBoxGeometry(W, 0.05, D, 4, 0.01),
+            [matExt, matExt, matLogo, matIn, matExt, matExt]
+        );
+        lid.position.set(0, 0.02, D / 2);
+        lid.castShadow = true;
+        lidPivot.add(lid);
+
+        const flap = new THREE.Mesh(
+            new RoundedBoxGeometry(W, H, 0.04, 4, 0.01),
+            matFlap
+        );
+        flap.position.set(0, -H / 2 + 0.02, D / 2 - 0.015);
+        flap.castShadow = true;
+        lid.add(flap);
+
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(30, 30),
+            new THREE.ShadowMaterial({ opacity: 0.15 })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
 
         // --- CONTROLES ---
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping=true; controls.enableZoom=true; controls.minDistance=2; controls.maxDistance=15;
-        
-        let isOpen=false, isFocus=false;
+        controls.enableDamping = true;
+        controls.enableZoom = true;
+        controls.minDistance = 2;
+        controls.maxDistance = 15;
+
+        let isOpen = false;
+        let isFocus = false;
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
@@ -196,38 +420,44 @@
         let touchStartX = 0;
         let touchStartY = 0;
 
-        // 1. On touche l'écran
-        renderer.domElement.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: false });
+        renderer.domElement.addEventListener(
+            'touchstart',
+            (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            },
+            { passive: false }
+        );
 
-        // 2. On lève le doigt
-        renderer.domElement.addEventListener('touchend', (e) => {
-            if (isFocus) return; // Si déjà zoomé, on fait rien
+        renderer.domElement.addEventListener(
+            'touchend',
+            (e) => {
+                if (isFocus) return;
 
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            
-            // Calcul de la distance parcourue par le doigt
-            const dist = Math.sqrt(Math.pow(touchEndX - touchStartX, 2) + Math.pow(touchEndY - touchStartY, 2));
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
 
-            // Si le doigt a bougé de moins de 10 pixels, C'EST UN CLIC (Tap)
-            // Sinon, c'est un mouvement de caméra, donc on ignore
-            if (dist < 10) {
-                e.preventDefault(); // Empêche le zoom double-tap du navigateur
-                
-                mouse.x = (touchEndX / window.innerWidth) * 2 - 1;
-                mouse.y = -(touchEndY / window.innerHeight) * 2 + 1;
-                
-                checkIntersection();
+                const dist = Math.sqrt(
+                    Math.pow(touchEndX - touchStartX, 2) +
+                        Math.pow(touchEndY - touchStartY, 2)
+                );
+
+                if (dist < 10) {
+                    e.preventDefault();
+
+                    mouse.x = (touchEndX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(touchEndY / window.innerHeight) * 2 + 1;
+
+                    checkIntersection();
+                }
             }
-        });
+        );
 
         // Clic souris classique pour PC
         window.addEventListener('click', (e) => {
             if (e.target.closest('button')) return;
             if (isFocus) return;
+
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
             checkIntersection();
@@ -235,79 +465,147 @@
 
         function checkIntersection() {
             raycaster.setFromCamera(mouse, camera);
-            // On teste l'intersection avec les HITBOXES (plus grosses), pas les objets
             const hits = raycaster.intersectObjects([hitPlate, hitPouch]);
-            
-            if(hits.length > 0) {
-                // On récupère le vrai objet lié à la hitbox
+
+            if (hits.length > 0) {
                 const realObj = hits[0].object.userData.parentObj;
                 focusObj(realObj);
             }
         }
 
         // --- ANIMATIONS ---
-        window.toggleLid = function() {
+        window.toggleLid = function () {
             isOpen = !isOpen;
             const targetRot = isOpen ? -Math.PI / 1.7 : 0;
-            const easing = isOpen ? TWEEN.Easing.Back.Out : TWEEN.Easing.Cubic.Out;
-            new TWEEN.Tween(lidPivot.rotation).to({ x: targetRot }, 1000).easing(easing).start();
-            
-            // Change le texte du bouton
+            const easing = isOpen
+                ? TWEEN.Easing.Back.Out
+                : TWEEN.Easing.Cubic.Out;
+
+            new TWEEN.Tween(lidPivot.rotation)
+                .to({ x: targetRot }, 1000)
+                .easing(easing)
+                .start();
+
             const btn = document.querySelector('.ctrl-btn');
-            if(btn) btn.innerText = isOpen ? "Fermer" : "Ouvrir";
+            if (btn) btn.innerText = isOpen ? 'Fermer' : 'Ouvrir';
         };
 
         function focusObj(obj) {
             isFocus = true;
-            if(!isOpen) toggleLid();
-            document.getElementById('ui-cam').style.opacity=0; document.getElementById('ui-cam').style.pointerEvents='none';
+            if (!isOpen) toggleLid();
 
-            // Sortie Sachet
-            if(obj === pouch) {
-                new TWEEN.Tween(wipeObj.position).to({ y: 0.35, z: -0.15 }, 1000).easing(TWEEN.Easing.Cubic.Out).delay(100).start();
-                new TWEEN.Tween(wipeObj.rotation).to({ x: 0.4, z: 0.1 }, 1200).delay(100).start();
+            const ui = document.getElementById('ui-cam');
+            ui.style.opacity = 0;
+            ui.style.pointerEvents = 'none';
+
+            if (obj === pouch) {
+                new TWEEN.Tween(wipeObj.position)
+                    .to({ y: 0.35, z: -0.15 }, 1000)
+                    .easing(TWEEN.Easing.Cubic.Out)
+                    .delay(100)
+                    .start();
+                new TWEEN.Tween(wipeObj.rotation)
+                    .to({ x: 0.4, z: 0.1 }, 1200)
+                    .delay(100)
+                    .start();
             }
 
-            new TWEEN.Tween(obj.position).to({y: obj.userData.y + 0.1}, 1000).easing(TWEEN.Easing.Quadratic.Out).start();
-            
+            new TWEEN.Tween(obj.position)
+                .to({ y: obj.userData.y + 0.1 }, 1000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
             const targetPos = new THREE.Vector3();
             obj.getWorldPosition(targetPos);
-            const camOffset = (obj === pouch) ? 0.2 : -0.5;
+            const camOffset = obj === pouch ? 0.2 : -0.5;
 
-            new TWEEN.Tween(camera.position).to({x: targetPos.x + camOffset, y: targetPos.y + 1.5, z: targetPos.z + 1.5}, 1200).easing(TWEEN.Easing.Cubic.InOut).start();
-            new TWEEN.Tween(controls.target).to({x: targetPos.x, y: targetPos.y, z: targetPos.z}, 1200).easing(TWEEN.Easing.Cubic.InOut).start();
+            new TWEEN.Tween(camera.position)
+                .to(
+                    {
+                        x: targetPos.x + camOffset,
+                        y: targetPos.y + 1.5,
+                        z: targetPos.z + 1.5
+                    },
+                    1200
+                )
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+
+            new TWEEN.Tween(controls.target)
+                .to(
+                    {
+                        x: targetPos.x,
+                        y: targetPos.y,
+                        z: targetPos.z
+                    },
+                    1200
+                )
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
 
             setTimeout(() => {
-                const id = obj.userData.id === 'plate' ? 'card-plate' : 'card-pouch';
+                const id = obj.userData.id === 'plate'
+                    ? 'card-plate'
+                    : 'card-pouch';
                 document.getElementById(id).classList.add('active');
                 document.getElementById('btn-back').classList.add('visible');
             }, 800);
         }
 
-        window.resetView = function() {
+        window.resetView = function () {
             isFocus = false;
-            document.querySelectorAll('.info-card').forEach(e=>e.classList.remove('active'));
-            document.getElementById('btn-back').classList.remove('visible');
 
-            new TWEEN.Tween(plate.position).to({y: plate.userData.y}, 800).start();
-            new TWEEN.Tween(pouch.position).to({y: pouch.userData.y}, 800).start();
+            document
+                .querySelectorAll('.info-card')
+                .forEach((e) => e.classList.remove('active'));
+            document
+                .getElementById('btn-back')
+                .classList.remove('visible');
 
-            new TWEEN.Tween(wipeObj.position).to({y: 0.0}, 800).easing(TWEEN.Easing.Cubic.In).start();
-            new TWEEN.Tween(wipeObj.rotation).to({x: 0, z: 0}, 800).start();
+            new TWEEN.Tween(plate.position)
+                .to({ y: plate.userData.y }, 800)
+                .start();
+            new TWEEN.Tween(pouch.position)
+                .to({ y: pouch.userData.y }, 800)
+                .start();
 
-            new TWEEN.Tween(camera.position).to({x: 4, y: 5, z: 6}, 1000).easing(TWEEN.Easing.Cubic.InOut).start();
-            new TWEEN.Tween(controls.target).to({x: 0, y: 0, z: 0}, 1000).easing(TWEEN.Easing.Cubic.InOut).start();
+            new TWEEN.Tween(wipeObj.position)
+                .to({ y: wipeObj.userData.y, z: 0 }, 800)
+                .easing(TWEEN.Easing.Cubic.In)
+                .start();
+            new TWEEN.Tween(wipeObj.rotation)
+                .to({ x: 0, z: 0 }, 800)
+                .start();
 
-            setTimeout(() => { document.getElementById('ui-cam').style.opacity=1; document.getElementById('ui-cam').style.pointerEvents='auto'; }, 1000);
+            new TWEEN.Tween(camera.position)
+                .to({ x: 4, y: 5, z: 6 }, 1000)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+            new TWEEN.Tween(controls.target)
+                .to({ x: 0, y: 0, z: 0 }, 1000)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+
+            setTimeout(() => {
+                const ui = document.getElementById('ui-cam');
+                ui.style.opacity = 1;
+                ui.style.pointerEvents = 'auto';
+            }, 1000);
         };
 
-        function animate(t) { requestAnimationFrame(animate); TWEEN.update(t); controls.update(); renderer.render(scene, camera); }
+        function animate(t) {
+            requestAnimationFrame(animate);
+            TWEEN.update(t);
+            controls.update();
+            renderer.render(scene, camera);
+        }
         animate();
-        window.onresize = () => { camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); };
+
+        window.onresize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
     </script>
 </body>
 </html>
-
-
-
-
