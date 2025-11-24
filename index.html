@@ -144,7 +144,8 @@
         const base = new THREE.Mesh(new RoundedBoxGeometry(W, H, D, 4, 0.01), matExt);
         base.position.y=H/2; base.castShadow=true; group.add(base);
 
-      const matFoam = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.95 });
+        const foam = new THREE.Mesh(new THREE.BoxGeometry(W-0.08, 0.05, D-0.08), matFoam);
+        foam.position.set(0, H-0.025, 0); group.add(foam);
 
         // --- OBJETS VISIBLES ---
         const plate = new THREE.Mesh(new RoundedBoxGeometry(0.85, 0.01, 0.54, 2, 0.01), matPlate);
@@ -306,4 +307,7 @@
     </script>
 </body>
 </html>
+
+
+
 
