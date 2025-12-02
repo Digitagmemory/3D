@@ -186,7 +186,7 @@
 
         // --- CONTROLES ---
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping=true; controls.enableZoom=true; controls.minDistance=2; controls.maxDistance=15;
+        controls.enableDamping=true; controls.enableZoom=false; controls.minDistance=2; controls.maxDistance=15;
         
         let isOpen=false, isFocus=false;
         const raycaster = new THREE.Raycaster();
@@ -307,6 +307,7 @@
     </script>
 </body>
 </html>
+
 
 
 
